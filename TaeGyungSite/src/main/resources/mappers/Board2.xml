@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org/DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.example.taegyungsite.dao.Board2Dao">
+
+    <sql id="boardColumns">
+         IDX
+        ,TITLE
+        ,CONTENT
+        ,WRITER
+        ,VIEW_CNT
+        ,NOTICE_YN
+        ,SECRET_YN
+        ,DELETE_YN
+        ,INSERT_TIME
+        ,UPDATE_TIME
+        ,DELETE_TIME
+    </sql>
+
+    <insert id="insertBoard"
+            parameterType="com.example.taegyungsite.model.Board2Dto">
+        INSERT INTO TB_BOARD2 (
+              IDX
+             ,TITLE
+             ,CONTENT
+             ,WRITER
+             ,VIEW_CNT
+             ,NOTICE_YN
+             ,SECRET_YN
+             ,DELETE_YN
+             ,INSERT_TIME
+             ,UPDATE_TIME
+             ,DELETE_TIME
+        ) VALUES (
+          SQ_TB_BOARD.NEXTVAL
+          ,#{title}
+          ,#{content}
+          ,#{writer}
+          , 0
+          , NVL(#{noticeYn},'N')
+          , 'N'
+          , 'N'
+          , SYSDATE
+          , null
+          , null
+        )
+    </insert>
+
+<!--    Board2Dto selectBoardDetail(Long idx);-->
+    <select id="selectBoardDetail" parameterType="Long"
+            resultType="com.example.taegyungsite.model.Board2Dto">
+        SELECT
+            IDX
+             ,TITLE
+             ,CONTENT
+             ,WRITER
+             ,VIEW_CNT
+             ,NOTICE_YN
+             ,SECRET_YN
+             ,DELETE_YN
+             ,INSERT_TIME
+             ,UPDATE_TIME
+             ,DELETE_TIME
+        FROM
+        TB_BOARD2
+        WHERE DELETE_YN = 'N'
+        AND IDX = #{idx}
+
+    </select>
+
+    <select id="selectBoardAllList"
+            parameterType="com.example.taegyungsite.model.Board2Dto"
+            resultType="com.example.taegyungsite.model.Board2Dto">
+        SELECT
+            <include refid="boardColumns"></include>
+        FROM
+        TB_BOARD2
+        WHERE DELETE_YN = 'N'
+        ORDER BY
+        NOTICE_YN ASC,
+        IDX DESC,
+        INSERT_TIME DESC
+    </select>
+
+    <update id="deleteBoard" parameterType="Long">
+        UPDATE TB_BOARD2
+        SET
+            DELETE_YN = 'Y'
+            ,DELETE_TIME = SYSDATE
+        WHERE
+            IDX = #{idx}
+    </update>
+
+    <select id="selectBoardTotalCount"
+            parameterType="com.example.taegyungsite.model.Board2Dto"
+            resultType="int">
+        SELECT
+            COUNT(*)
+        FROM TB_BOARD2
+        WHERE DELETE_YN = 'N'
+    </select>
+
+    <update id="updateBoard"
+            parameterType="com.example.taegyungsite.model.Board2Dto">
+        UPDATE TB_BOARD2
+        SET
+            UPDATE_TIME = SYSDATE
+           ,TITLE       = #{title}
+           ,CONTENT     = #{content}
+           ,WRITER      = #{writer}
+           ,NOTICE_YN   = NVL(#{noticeYn}, 'N')
+           ,SECRET_YN   = NVL(#{secretYn}, 'N')
+    </update>
+
+<!--    페이징 처리 및 검색을 위한 쿼리문 -->
+    <select id="selectBoardList"
+            parameterType="com.example.taegyungsite.model.Board2Dto"
+            resultType="com.example.taegyungsite.model.Board2Dto">
+        SELECT *
+        FROM (
+            SELECT ROWNUM R,
+                   TBB.*
+            FROM TB_BOARD2 TBB
+            WHERE ROWNUM &lt;= #{currentPageNo} * #{recordsPerPage}
+            AND DELETE_YN = 'N'
+        )
+        WHERE R &gt; ( #{currentPageNo} - 1 ) * #{recordsPerPage}
+        <include refid="Common.search"></include>
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
